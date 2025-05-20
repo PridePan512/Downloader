@@ -18,6 +18,7 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.example.downloader.R
 import com.example.downloader.dialog.TaskSheetDialogFragment
+import com.example.downloader.utils.AndroidUtil
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.textfield.TextInputEditText
 
@@ -100,6 +101,11 @@ class MainActivity : AppCompatActivity() {
             //强制关闭软键盘
             val imm = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
             imm.hideSoftInputFromWindow(urlEditText.windowToken, 0)
+
+            if (!AndroidUtil.isNetworkAvailable(this)) {
+                Toast.makeText(this, "网络不可用", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
 
             if (TextUtils.isEmpty(urlEditText.text)) {
                 Toast.makeText(this, "url为空", Toast.LENGTH_SHORT).show()
