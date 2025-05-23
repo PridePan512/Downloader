@@ -1,7 +1,6 @@
 package com.example.downloader.activity
 
 import android.content.ClipboardManager
-import android.content.Context
 import android.content.res.Resources
 import android.os.Bundle
 import android.text.Editable
@@ -80,7 +79,7 @@ class MainActivity : AppCompatActivity() {
         })
 
         findViewById<FloatingActionButton>(R.id.fab_paste).setOnClickListener {
-            val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+            val clipboard = getSystemService(CLIPBOARD_SERVICE) as ClipboardManager
             val clipData = clipboard.primaryClip
 
             val textFromClipboard = if (clipData != null && clipData.itemCount > 0) {

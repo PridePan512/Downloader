@@ -5,6 +5,7 @@
     android:layout_height="wrap_content">
 
     <View
+        android:id="@+id/v_top_line"
         android:layout_width="30dp"
         android:layout_height="4dp"
         android:layout_marginTop="20dp"
@@ -15,12 +16,12 @@
 
     <TextView
         android:id="@+id/tv_url"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="500dp"
+        android:layout_marginTop="10dp"
         android:text="dialog fsfsfsfs"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@id/v_top_line" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -7,8 +7,14 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.annotation.LayoutRes
+import androidx.lifecycle.lifecycleScope
 import com.example.downloader.R
+import com.example.library.LibHelper
+import com.example.library.model.YtDlpRequest
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 
 class TaskSheetDialogFragment(@LayoutRes contentLayoutId: Int = R.layout.dialog_sheet_task) :
@@ -40,8 +46,15 @@ class TaskSheetDialogFragment(@LayoutRes contentLayoutId: Int = R.layout.dialog_
         val urlTextView = view.findViewById<TextView>(R.id.tv_url)
 
         val url = arguments?.getString(TAG_URL)
-        if (!TextUtils.isEmpty(url)) {
-            urlTextView.text = url
+        if (TextUtils.isEmpty(url)) {
+            return
+        }
+
+        lifecycleScope.launch(Dispatchers.IO) {
+            val request = YtDlpRequest(url.toString())
+            withContext(Dispatchers.Main) {
+                urlTextView.text = LibHelper.getInfo(request)
+            }
         }
     }
 }
