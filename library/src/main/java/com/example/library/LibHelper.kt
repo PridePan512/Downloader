@@ -3,16 +3,17 @@ package com.example.library
 import android.content.Context
 import android.util.Log
 import androidx.annotation.WorkerThread
+import com.example.library.model.VideoInfo
+import com.example.library.model.YtDlpException
 import com.example.library.model.YtDlpRequest
 import com.example.library.model.YtDlpResponse
 import com.example.library.utils.FileUtils
 import com.example.library.utils.StreamGobbler
 import com.example.library.utils.StreamProcessExtractor
+import com.fasterxml.jackson.databind.ObjectMapper
 import java.io.File
 import java.io.IOException
 import java.util.Collections
-
-// TODO: 处理第一次初始化失败的情况
 
 object LibHelper {
 
@@ -54,9 +55,13 @@ object LibHelper {
         request: YtDlpRequest,
         processId: String? = null,
         callback: ((Float, Long, String) -> Unit)? = null
-    ): String {
-        if (!initSuccess) throw Exception("Initialize failed")
-        if (processId != null && mIdProcessMap.containsKey(processId)) throw Exception("Process ID already exists")
+    ): YtDlpResponse {
+        if (!initSuccess) {
+            throw YtDlpException("Initialize failed", "please reopen app")
+        }
+        if (processId != null && mIdProcessMap.containsKey(processId)) {
+            throw YtDlpException("Process ID already exists", "please reopen app")
+        }
 
         request.addOption("--dump-json")
         // 禁用缓存
@@ -74,7 +79,6 @@ object LibHelper {
         }
 
         request.addOption("--ffmpeg-location", File(mNativeLibraryDir, "libffmpeg.so").absolutePath)
-        val ytDlpResponse: YtDlpResponse
         val process: Process
         val exitCode: Int
         val outBuffer = StringBuffer() //stdout
@@ -102,7 +106,7 @@ object LibHelper {
         process = try {
             processBuilder.start()
         } catch (e: IOException) {
-            throw Exception(e)
+            throw YtDlpException("Process start error", e.toString())
         }
         if (processId != null) {
             mIdProcessMap[processId] = process
@@ -118,23 +122,29 @@ object LibHelper {
         } catch (e: InterruptedException) {
             process.destroy()
             if (processId != null) mIdProcessMap.remove(processId)
-            throw e
+            throw YtDlpException("Process error", e.toString())
         }
         val out = outBuffer.toString()
         val err = errBuffer.toString()
         if (exitCode > 0) {
-            if (processId != null && !mIdProcessMap.containsKey(processId))
-                throw Exception()
+            if (processId != null && !mIdProcessMap.containsKey(processId)) {
+                throw YtDlpException("Process error", "Process error")
+            }
+            throw Exception()
             if (!request.hasOption("--dump-json") || out.isEmpty() || !request.hasOption("--ignore-errors")) {
                 mIdProcessMap.remove(processId)
-                throw Exception(err)
+                throw YtDlpException("Process error", err)
             }
         }
         mIdProcessMap.remove(processId)
-
         val elapsedTime = System.currentTimeMillis() - startTime
-        ytDlpResponse = YtDlpResponse(command, exitCode, elapsedTime, out, err)
-        return ytDlpResponse.out
+        val videoInfo: VideoInfo = try {
+            ObjectMapper().readValue(out, VideoInfo::class.java)
+        } catch (e: IOException) {
+            throw YtDlpException("Unable to parse video information", e.toString())
+        } ?: throw YtDlpException("Failed error", "failed to fetch video information")
+
+        return YtDlpResponse(command, exitCode, elapsedTime, videoInfo)
     }
 
     private fun initPython(context: Context) {
