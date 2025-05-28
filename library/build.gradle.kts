@@ -45,5 +45,4 @@ dependencies {
     implementation(libs.org.apache.commons)
     implementation(libs.jackson.databind)
     implementation(libs.jackson.annotations)
-    implementation(libs.glide)
 }

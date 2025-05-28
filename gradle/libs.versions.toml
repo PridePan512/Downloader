@@ -13,6 +13,7 @@ io = "2.6"
 compress = "1.24.0"
 jackson = "2.11.1"
 glide = "4.15.1"
+eventbus = "3.3.1"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -28,6 +29,7 @@ org-apache-commons = { group = "org.apache.commons", name = "commons-compress", 
 jackson-databind = { group = "com.fasterxml.jackson.core", name = "jackson-databind", version.ref = "jackson" }
 jackson-annotations = { group = "com.fasterxml.jackson.core", name = "jackson-annotations", version.ref = "jackson" }
 glide = { group = "com.github.bumptech.glide", name = "glide", version.ref = "glide" }
+eventbus = { group = "org.greenrobot", name = "eventbus", version.ref = "eventbus" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

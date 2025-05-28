@@ -128,9 +128,8 @@ object LibHelper {
         val err = errBuffer.toString()
         if (exitCode > 0) {
             if (processId != null && !mIdProcessMap.containsKey(processId)) {
-                throw YtDlpException("Process error", "Process error")
+                throw YtDlpException("Process error", "Process cancel")
             }
-            throw Exception()
             if (!request.hasOption("--dump-json") || out.isEmpty() || !request.hasOption("--ignore-errors")) {
                 mIdProcessMap.remove(processId)
                 throw YtDlpException("Process error", err)

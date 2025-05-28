@@ -10,7 +10,7 @@ class MyApplication : Application() {
         super.onCreate()
         // 开启动态配色
         DynamicColors.applyToActivitiesIfAvailable(this)
-        //初始化资源
+        // 初始化资源
         LibHelper.init(applicationContext)
     }
 }
