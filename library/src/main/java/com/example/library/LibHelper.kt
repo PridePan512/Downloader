@@ -1,6 +1,7 @@
 package com.example.library
 
 import android.content.Context
+import android.os.Environment
 import android.util.Log
 import androidx.annotation.WorkerThread
 import com.example.library.model.VideoInfo
@@ -50,8 +51,35 @@ object LibHelper {
         initSuccess = true
     }
 
-    @JvmOverloads
-    fun getInfo(
+    @WorkerThread
+    fun getVideoInfo(request: YtDlpRequest): VideoInfo {
+        request.addOption("--dump-json")
+
+        val ytDlpResponse = execute(request)
+        val videoInfo: VideoInfo = try {
+            ObjectMapper().readValue(ytDlpResponse.out, VideoInfo::class.java)
+        } catch (e: IOException) {
+            throw YtDlpException("Unable to parse video information", e.toString())
+        } ?: throw YtDlpException("Failed error", "failed to fetch video information")
+
+        return videoInfo
+    }
+
+    @WorkerThread
+    fun downloadVideo(url: String) {
+        val request = YtDlpRequest(url)
+
+        request.addOption("--no-mtime")
+        //使用 aria2c 作为下载器
+        request.addOption("--downloader", "libaria2c.so")
+        //优先选择分离的视频流（mp4）和音频流（m4a），其次选择最好的 mp4 或任何格式
+        request.addOption("-f", "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best")
+        request.addOption("-o", getDownloadDir() + "/%(title)s.%(ext)s")
+
+        execute(request)
+    }
+
+    private fun execute(
         request: YtDlpRequest,
         processId: String? = null,
         callback: ((Float, Long, String) -> Unit)? = null
@@ -62,8 +90,6 @@ object LibHelper {
         if (processId != null && mIdProcessMap.containsKey(processId)) {
             throw YtDlpException("Process ID already exists", "please reopen app")
         }
-
-        request.addOption("--dump-json")
         // 禁用缓存
         if (!request.hasOption("--cache-dir") || request.getOption("--cache-dir") == null) {
             request.addOption("--no-cache-dir")
@@ -137,13 +163,7 @@ object LibHelper {
         }
         mIdProcessMap.remove(processId)
         val elapsedTime = System.currentTimeMillis() - startTime
-        val videoInfo: VideoInfo = try {
-            ObjectMapper().readValue(out, VideoInfo::class.java)
-        } catch (e: IOException) {
-            throw YtDlpException("Unable to parse video information", e.toString())
-        } ?: throw YtDlpException("Failed error", "failed to fetch video information")
-
-        return YtDlpResponse(command, exitCode, elapsedTime, videoInfo)
+        return YtDlpResponse(command, exitCode, elapsedTime, out)
     }
 
     private fun initPython(context: Context) {
@@ -224,7 +244,7 @@ object LibHelper {
             return
         }
         aria2cDir.mkdirs()
-        val aria2cLib = File(mNativeLibraryDir, "libffmpeg.zip.so")
+        val aria2cLib = File(mNativeLibraryDir, "libaria2c.zip.so")
 
         if (!aria2cDir.exists()) {
             FileUtils.deleteFile(aria2cDir)
@@ -234,9 +254,18 @@ object LibHelper {
             } catch (e: Exception) {
                 initSuccess = false
                 FileUtils.deleteFile(aria2cDir)
-                Log.e(TAG, "initFfmpeg: $e")
+                Log.e(TAG, "initAria2c: $e")
                 throw Exception(e)
             }
         }
+    }
+
+    private fun getDownloadDir(): String {
+        val downloadsDir = File(
+            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
+            "download_test"
+        )
+        if (!downloadsDir.exists()) downloadsDir.mkdir()
+        return downloadsDir.absolutePath
     }
 }

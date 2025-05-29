@@ -1,19 +1,26 @@
 package com.example.downloader.adapter
 
+import android.text.TextUtils
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.downloader.R
 import com.example.downloader.utils.AndroidUtil
+import com.example.library.LibHelper
 import com.example.library.model.VideoInfo
 import com.google.android.material.progressindicator.LinearProgressIndicator
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.util.Locale
 
-class TaskAdapter : RecyclerView.Adapter<TaskAdapter.MyViewHolder>() {
+class TaskAdapter(private val mLifecycleOwner: LifecycleOwner) :
+    RecyclerView.Adapter<TaskAdapter.MyViewHolder>() {
 
     private val mVideoTasks = ArrayList<VideoInfo>()
 
@@ -29,7 +36,7 @@ class TaskAdapter : RecyclerView.Adapter<TaskAdapter.MyViewHolder>() {
         holder: MyViewHolder,
         position: Int
     ) {
-        holder.bindData(mVideoTasks[position])
+        holder.bindData(mVideoTasks[position], mLifecycleOwner)
     }
 
     override fun getItemCount(): Int {
@@ -52,7 +59,7 @@ class TaskAdapter : RecyclerView.Adapter<TaskAdapter.MyViewHolder>() {
         private val download = itemView.findViewById<ImageView>(R.id.iv_download)
         private val progress = itemView.findViewById<LinearProgressIndicator>(R.id.v_progress)
 
-        fun bindData(videoInfo: VideoInfo) {
+        fun bindData(videoInfo: VideoInfo, lifecycleOwner: LifecycleOwner) {
             Glide
                 .with(itemView.context)
                 .load(videoInfo.thumbnail)
@@ -64,15 +71,15 @@ class TaskAdapter : RecyclerView.Adapter<TaskAdapter.MyViewHolder>() {
             format.text = videoInfo.format
             duration.text = AndroidUtil.formatDuration(videoInfo.duration.toLong())
             duration.background.alpha = 180
-            size.text = AndroidUtil.getHumanFriendlyByteCount(
-                if (videoInfo.fileSize == 0L) {
-                    videoInfo.fileSizeApproximate
-                } else {
-                    videoInfo.fileSize
-                }
-            )
+            size.text = AndroidUtil.getHumanFriendlyByteCount(videoInfo.getSize())
 
             download.setOnClickListener {
+                if (TextUtils.isEmpty(videoInfo.webpageUrl)) {
+                    return@setOnClickListener
+                }
+                lifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
+                    LibHelper.downloadVideo(videoInfo.webpageUrl!!)
+                }
                 progress.visibility = View.VISIBLE
             }
         }

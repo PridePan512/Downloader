@@ -57,7 +57,7 @@ class TaskSheetDialogFragment(@LayoutRes contentLayoutId: Int = R.layout.dialog_
         lifecycleScope.launch(Dispatchers.IO) {
             try {
                 val request = YtDlpRequest(url.toString())
-                val videoInfo = LibHelper.getInfo(request).videoInfo
+                val videoInfo = LibHelper.getVideoInfo(request)
                 withContext(Dispatchers.Main) {
                     //urlTextView.text = LibHelper.getInfo(request)
                     Log.i("test", "videoInfo.id: " + videoInfo.id)

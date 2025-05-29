@@ -4,7 +4,7 @@ class YtDlpResponse(
     val command: List<String?>,
     val exitCode: Int,
     val elapsedTime: Long,
-    val videoInfo: VideoInfo
+    val out: String
 )
 
 class YtDlpException(
