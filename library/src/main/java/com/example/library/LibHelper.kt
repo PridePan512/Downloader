@@ -66,7 +66,11 @@ object LibHelper {
     }
 
     @WorkerThread
-    fun downloadVideo(url: String) {
+    fun downloadVideo(
+        url: String,
+        processId: String? = null,
+        callback: ((Float, Long, String) -> Unit)? = null
+    ) {
         val request = YtDlpRequest(url)
 
         request.addOption("--no-mtime")
@@ -76,7 +80,7 @@ object LibHelper {
         request.addOption("-f", "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best")
         request.addOption("-o", getDownloadDir() + "/%(title)s.%(ext)s")
 
-        execute(request)
+        execute(request, processId, callback)
     }
 
     private fun execute(

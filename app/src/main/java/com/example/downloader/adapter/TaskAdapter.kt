@@ -57,6 +57,7 @@ class TaskAdapter(private val mLifecycleOwner: LifecycleOwner) :
         private val extension = itemView.findViewById<TextView>(R.id.tv_extension)
         private val duration = itemView.findViewById<TextView>(R.id.tv_duration)
         private val download = itemView.findViewById<ImageView>(R.id.iv_download)
+        private val complete = itemView.findViewById<ImageView>(R.id.iv_complete)
         private val progress = itemView.findViewById<LinearProgressIndicator>(R.id.v_progress)
 
         fun bindData(videoInfo: VideoInfo, lifecycleOwner: LifecycleOwner) {
@@ -77,10 +78,22 @@ class TaskAdapter(private val mLifecycleOwner: LifecycleOwner) :
                 if (TextUtils.isEmpty(videoInfo.webpageUrl)) {
                     return@setOnClickListener
                 }
-                lifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
-                    LibHelper.downloadVideo(videoInfo.webpageUrl!!)
-                }
+                download.visibility = View.GONE
                 progress.visibility = View.VISIBLE
+                lifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
+                    LibHelper.downloadVideo(
+                        videoInfo.webpageUrl!!,
+                        processId = null
+                    ) { _, _, line ->
+                        // TODO: 这里的进度不太准确 暂时先不显示进度
+                        if (line.startsWith("[Merger]")) {
+                            lifecycleOwner.lifecycleScope.launch(Dispatchers.Main) {
+                                progress.visibility = View.GONE
+                                complete.visibility = View.VISIBLE
+                            }
+                        }
+                    }
+                }
             }
         }
     }
