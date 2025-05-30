@@ -11,6 +11,8 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.downloader.R
+import com.example.downloader.model.DownloadState
+import com.example.downloader.model.VideoTask
 import com.example.downloader.utils.AndroidUtil
 import com.example.library.LibHelper
 import com.example.library.model.VideoInfo
@@ -22,7 +24,7 @@ import java.util.Locale
 class TaskAdapter(private val mLifecycleOwner: LifecycleOwner) :
     RecyclerView.Adapter<TaskAdapter.MyViewHolder>() {
 
-    private val mVideoTasks = ArrayList<VideoInfo>()
+    private val mVideoTasks = ArrayList<VideoTask>()
 
     override fun onCreateViewHolder(
         parent: ViewGroup,
@@ -44,7 +46,7 @@ class TaskAdapter(private val mLifecycleOwner: LifecycleOwner) :
     }
 
     fun insertTask(videoInfo: VideoInfo) {
-        mVideoTasks.add(0, videoInfo)
+        mVideoTasks.add(0, VideoTask(videoInfo))
         notifyItemInserted(0)
     }
 
@@ -60,7 +62,8 @@ class TaskAdapter(private val mLifecycleOwner: LifecycleOwner) :
         private val complete = itemView.findViewById<ImageView>(R.id.iv_complete)
         private val progress = itemView.findViewById<LinearProgressIndicator>(R.id.v_progress)
 
-        fun bindData(videoInfo: VideoInfo, lifecycleOwner: LifecycleOwner) {
+        fun bindData(videoTask: VideoTask, lifecycleOwner: LifecycleOwner) {
+            val videoInfo = videoTask.videoInfo
             Glide
                 .with(itemView.context)
                 .load(videoInfo.thumbnail)
@@ -74,10 +77,31 @@ class TaskAdapter(private val mLifecycleOwner: LifecycleOwner) :
             duration.background.alpha = 180
             size.text = AndroidUtil.getHumanFriendlyByteCount(videoInfo.getSize())
 
+            when (videoTask.state) {
+                DownloadState.notDownload -> {
+                    progress.visibility = View.GONE
+                    complete.visibility = View.GONE
+                    download.visibility = View.VISIBLE
+                }
+
+                DownloadState.downloading -> {
+                    progress.visibility = View.VISIBLE
+                    complete.visibility = View.GONE
+                    download.visibility = View.GONE
+                }
+
+                DownloadState.downloaded -> {
+                    progress.visibility = View.GONE
+                    complete.visibility = View.VISIBLE
+                    download.visibility = View.GONE
+                }
+            }
+
             download.setOnClickListener {
                 if (TextUtils.isEmpty(videoInfo.webpageUrl)) {
                     return@setOnClickListener
                 }
+                videoTask.state = DownloadState.downloading
                 download.visibility = View.GONE
                 progress.visibility = View.VISIBLE
                 lifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
@@ -88,6 +112,7 @@ class TaskAdapter(private val mLifecycleOwner: LifecycleOwner) :
                         // TODO: 这里的进度不太准确 暂时先不显示进度
                         if (line.startsWith("[Merger]")) {
                             lifecycleOwner.lifecycleScope.launch(Dispatchers.Main) {
+                                videoTask.state = DownloadState.downloaded
                                 progress.visibility = View.GONE
                                 complete.visibility = View.VISIBLE
                             }
