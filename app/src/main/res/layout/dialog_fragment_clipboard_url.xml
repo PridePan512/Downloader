@@ -29,7 +29,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="30dp"
-        android:text="检测到复制的链接"
+        android:text="@string/detected_url"
         android:textColor="@color/text_main"
         android:textSize="13sp"
         android:textStyle="bold"
@@ -58,7 +58,7 @@
         android:layout_marginHorizontal="20dp"
         android:layout_marginTop="20dp"
         android:background="@drawable/shape_bg_positive_button"
-        android:text="检测链接"
+        android:text="@string/inspect_and_clear_clipboard"
         android:textColor="@color/white"
         app:layout_constraintTop_toBottomOf="@id/tv_url" />
 
@@ -70,7 +70,7 @@
         android:layout_marginTop="10dp"
         android:layout_marginBottom="20dp"
         android:background="@drawable/shape_bg_negative_button"
-        android:text="清除粘贴板"
+        android:text="@string/clear_clipboard"
         android:textColor="@color/text_main"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toBottomOf="@id/btn_open_url" />

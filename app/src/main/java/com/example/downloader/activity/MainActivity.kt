@@ -63,9 +63,9 @@ class MainActivity : AppCompatActivity() {
                 ) {
                     tab.setText(
                         if (position == 0) {
-                            "Download"
+                            getString(R.string.tab_download)
                         } else {
-                            "History"
+                            getString(R.string.tab_history)
                         }
                     )
                 }

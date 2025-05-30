@@ -136,17 +136,17 @@ class DownloadFragment : Fragment() {
     private fun searchUrl(url: String) {
 
         if (TextUtils.isEmpty(url)) {
-            Toast.makeText(context, "url为空", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, R.string.url_is_empty, Toast.LENGTH_SHORT).show()
             return
         }
 
         if (!AndroidUtil.isValidWebUrl(url)) {
-            Toast.makeText(context, "不是合法的url", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, R.string.url_is_illegal, Toast.LENGTH_SHORT).show()
             return
         }
 
         if (!AndroidUtil.isNetworkAvailable(requireContext())) {
-            Toast.makeText(context, "网络不可用", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context,  R.string.network_not_available, Toast.LENGTH_SHORT).show()
             return
         }
 
@@ -162,6 +162,7 @@ class DownloadFragment : Fragment() {
             } catch (e: YtDlpException) {
                 Log.e(TAG, "initView: $e")
                 withContext(Dispatchers.Main) {
+                    // TODO: 处理失败的情况
                     Toast.makeText(context, "失败", Toast.LENGTH_SHORT).show()
                 }
             }
