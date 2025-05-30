@@ -60,6 +60,9 @@ class ClipboardDialogFragment : DialogFragment() {
         view.findViewById<Button>(R.id.btn_open_url).setOnClickListener {
             dismissAllowingStateLoss()
             EventBus.getDefault().post(UrlMessage(url!!))
+            context?.let {
+                AndroidUtil.clearClipboard(it)
+            }
         }
         view.findViewById<ImageView>(R.id.iv_close).setOnClickListener {
             dismissAllowingStateLoss()
