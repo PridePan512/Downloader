@@ -216,47 +216,39 @@ object LibHelper {
 
     private fun initFfmpeg() {
         val ffmpegDir = File(mNoBackupDir, "ffmpeg")
-        ENV_LD_LIBRARY_PATH += (":" + ffmpegDir.absolutePath + "/usr/lib")
-        if (ffmpegDir.exists()) {
-            return
-        }
-        ffmpegDir.mkdirs()
         val ffmpegLib = File(mNativeLibraryDir, "libffmpeg.zip.so")
 
-        if (!ffmpegDir.exists()) {
+        ENV_LD_LIBRARY_PATH += (":" + ffmpegDir.absolutePath + "/usr/lib")
+
+        if (ffmpegDir.exists()) return
+        ffmpegDir.mkdirs()
+
+        try {
+            FileUtils.unzip(ffmpegLib, ffmpegDir)
+        } catch (e: Exception) {
+            initSuccess = false
             FileUtils.deleteFile(ffmpegDir)
-            ffmpegDir.mkdirs()
-            try {
-                FileUtils.unzip(ffmpegLib, ffmpegDir)
-            } catch (e: Exception) {
-                initSuccess = false
-                FileUtils.deleteFile(ffmpegDir)
-                Log.e(TAG, "initFfmpeg: $e")
-                throw Exception(e)
-            }
+            Log.e(TAG, "initFfmpeg: $e")
+            throw e
         }
     }
 
     private fun initAria2c() {
         val aria2cDir = File(mNoBackupDir, "aria2c")
-        ENV_LD_LIBRARY_PATH += (":" + aria2cDir.absolutePath + "/usr/lib")
-        if (aria2cDir.exists()) {
-            return
-        }
-        aria2cDir.mkdirs()
         val aria2cLib = File(mNativeLibraryDir, "libaria2c.zip.so")
 
-        if (!aria2cDir.exists()) {
+        ENV_LD_LIBRARY_PATH += (":" + aria2cDir.absolutePath + "/usr/lib")
+
+        if (aria2cDir.exists()) return
+        aria2cDir.mkdirs()
+
+        try {
+            FileUtils.unzip(aria2cLib, aria2cDir)
+        } catch (e: Exception) {
+            initSuccess = false
             FileUtils.deleteFile(aria2cDir)
-            aria2cDir.mkdirs()
-            try {
-                FileUtils.unzip(aria2cLib, aria2cDir)
-            } catch (e: Exception) {
-                initSuccess = false
-                FileUtils.deleteFile(aria2cDir)
-                Log.e(TAG, "initAria2c: $e")
-                throw Exception(e)
-            }
+            Log.e(TAG, "initFfmpeg: $e")
+            throw e
         }
     }
 

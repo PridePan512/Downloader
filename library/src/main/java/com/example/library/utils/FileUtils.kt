@@ -6,6 +6,7 @@ import androidx.annotation.WorkerThread
 import org.apache.commons.compress.archivers.zip.ZipFile
 import org.apache.commons.io.IOUtils
 import java.io.File
+import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.io.IOException
 import java.io.InputStream
@@ -78,6 +79,32 @@ object FileUtils {
                 outputStream?.close()
             } catch (e: IOException) {
                 Log.e(TAG, "copyInputStreamToFile close error : $e")
+            }
+        }
+    }
+
+    @WorkerThread
+    fun copy(source: File, dest: File) {
+        // 创建目标文件夹（如果不存在）
+        dest.parentFile?.let {
+            if (!it.exists()) {
+                it.mkdirs()
+            }
+        }
+
+        // 创建目标文件（如果不存在）
+        if (!dest.exists()) {
+            dest.createNewFile()
+        }
+
+        FileInputStream(source).use { input ->
+            FileOutputStream(dest).use { output ->
+                val buffer = ByteArray(8192)
+                var bytesRead: Int
+                while (input.read(buffer).also { bytesRead = it } != -1) {
+                    output.write(buffer, 0, bytesRead)
+                }
+                output.flush()
             }
         }
     }
