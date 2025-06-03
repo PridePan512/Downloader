@@ -3,4 +3,5 @@
     <color name="text_main">#FFFFFF</color>
     <color name="text_sub">#ABABAB</color>
     <color name="border_weak">#262626</color>
+    <color name="red_main">#E55C5C</color>
 </resources>

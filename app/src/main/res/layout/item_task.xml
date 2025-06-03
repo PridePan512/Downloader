@@ -60,11 +60,11 @@
         android:id="@+id/v_format"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="10dp"
-        android:layout_marginVertical="10dp"
+        android:layout_margin="10dp"
         android:background="@drawable/shape_bg_task_format"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tv_author">
+        app:layout_constraintBottom_toTopOf="@id/v_failed"
+        app:layout_constraintTop_toBottomOf="@id/tv_author"
+        app:layout_goneMarginBottom="10dp">
 
         <TextView
             android:id="@+id/tv_format"
@@ -139,6 +139,51 @@
             android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/v_failed"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:background="@drawable/shape_bg_task_format"
+        android:padding="10dp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/v_format">
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/iv_worn"
+            android:layout_width="16dp"
+            android:layout_height="16dp"
+            android:src="@drawable/ic_vector_warn"
+            app:layout_constraintBottom_toBottomOf="@+id/tv_failed_title"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@id/tv_failed_title" />
+
+        <TextView
+            android:id="@+id/tv_failed_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="4dp"
+            android:textColor="@color/red_main"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toEndOf="@id/iv_worn"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="Unable to parse video information" />
+
+        <TextView
+            android:id="@+id/tv_failed_content"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:textColor="@color/text_main"
+            android:textSize="12sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tv_failed_title"
+            tools:text="Unable to match the desired swap behavior.Unable to match the desired swap behavior.Unable to match the desired swap behavior.Unable to match the desired swap behavior." />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

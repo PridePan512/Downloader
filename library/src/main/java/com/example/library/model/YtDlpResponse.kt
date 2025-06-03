@@ -8,6 +8,6 @@ class YtDlpResponse(
 )
 
 class YtDlpException(
-    title: String,
-    content: String
+    val title: String,
+    val content: String
 ) : Exception("$title: $content")
