@@ -10,4 +10,5 @@
     <string name="inspect_and_clear_clipboard">Inspect and clear clipboard</string>
     <string name="clear_clipboard">Clear clipboard</string>
     <string name="video_link">Video link</string>
+    <string name="unavailable">Unavailable</string>
 </resources>

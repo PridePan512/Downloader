@@ -7,11 +7,14 @@ import android.content.Context.CLIPBOARD_SERVICE
 import android.content.Context.INPUT_METHOD_SERVICE
 import android.content.res.Resources
 import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
+import android.os.Environment
 import android.text.format.DateUtils
 import android.util.Patterns
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import androidx.annotation.RequiresPermission
+import java.io.File
 import java.util.Locale
 import kotlin.math.ln
 import kotlin.math.pow
@@ -21,12 +24,18 @@ object AndroidUtil {
 
     @RequiresPermission("android.permission.ACCESS_NETWORK_STATE")
     fun isNetworkAvailable(context: Context): Boolean {
-        val manager = context
-            .applicationContext.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val connectivityManager =
+            context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
 
-        val networkInfo = manager.activeNetworkInfo
-
-        return !(networkInfo == null || !networkInfo.isAvailable)
+        val network = connectivityManager.activeNetwork ?: return false
+        val networkCapabilities =
+            connectivityManager.getNetworkCapabilities(network) ?: return false
+        return when {
+            networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> true
+            networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> true
+            networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET) -> true
+            else -> false
+        }
     }
 
     fun dpToPx(dp: Int): Int {
@@ -122,5 +131,14 @@ object AndroidUtil {
     fun hideKeyboard(context: Context, view: View) {
         val imm = context.getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
         imm.hideSoftInputFromWindow(view.windowToken, 0)
+    }
+
+    fun getDownloadDir(): String {
+        val downloadsDir = File(
+            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
+            "download_test"
+        )
+        if (!downloadsDir.exists()) downloadsDir.mkdir()
+        return downloadsDir.absolutePath
     }
 }

@@ -52,4 +52,8 @@ class YtDlpRequest {
         commandList.addAll(urls)
         return commandList
     }
+
+    fun getUrls(): List<String> {
+        return urls
+    }
 }

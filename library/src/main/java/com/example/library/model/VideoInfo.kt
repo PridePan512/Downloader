@@ -77,7 +77,8 @@ class VideoInfo {
 
     @JsonProperty("manifest_url")
     val manifestUrl: String? = null
-    val url: String? = null
+
+    var url: String? = null
 
     //如果fileSize和fileSizeApproximate都为0，那么只能采用比特率和时长来进行近似换算
     fun getSize(): Long {

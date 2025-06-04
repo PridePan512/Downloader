@@ -61,7 +61,7 @@ object LibHelper {
         } catch (e: IOException) {
             throw YtDlpException("Unable to parse video information", e.toString())
         } ?: throw YtDlpException("Failed error", "failed to fetch video information")
-
+        videoInfo.url = request.getUrls()[0]
         return videoInfo
     }
 
@@ -76,6 +76,8 @@ object LibHelper {
         request.addOption("--no-mtime")
         //使用 aria2c 作为下载器
         request.addOption("--downloader", "libaria2c.so")
+        //将所有文件名缩减为 ASCII 安全字符集（比如把空格换成 _，并移除特殊字符）
+        //request.addOption("--restrict-filenames")
         //优先选择分离的视频流（mp4）和音频流（m4a），其次选择最好的 mp4 或任何格式
         request.addOption("-f", "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best")
         request.addOption("-o", getDownloadDir() + "/%(title)s.%(ext)s")
