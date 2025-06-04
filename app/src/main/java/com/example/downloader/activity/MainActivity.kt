@@ -36,7 +36,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun initView() {
         val viewPager2 = findViewById<ViewPager2>(R.id.v_viewpager2)
-        val tabLayout = findViewById<TabLayout>(R.id.v_tablayout)
+        val tabLayout = findViewById<TabLayout>(R.id.v_tab_layout)
         viewPager2.offscreenPageLimit = 2
 
         viewPager2.adapter = object : FragmentStateAdapter(this) {
