@@ -22,8 +22,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.util.Locale
 
-class TaskAdapter(private val mLifecycleOwner: LifecycleOwner) :
-    RecyclerView.Adapter<TaskAdapter.MyViewHolder>() {
+class TaskDetectAdapter(private val mLifecycleOwner: LifecycleOwner) :
+    RecyclerView.Adapter<TaskDetectAdapter.MyViewHolder>() {
 
     private val mVideoTasks = ArrayList<VideoTask>()
 
@@ -123,6 +123,7 @@ class TaskAdapter(private val mLifecycleOwner: LifecycleOwner) :
                 failedView.visibility = View.GONE
                 lifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
                     try {
+                        // TODO: 处理安卓10以下的权限适配
                         LibHelper.downloadVideo(
                             videoInfo.webpageUrl!!,
                             processId = null

@@ -11,13 +11,14 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.widget.ImageView
+import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.downloader.R
-import com.example.downloader.adapter.TaskAdapter
+import com.example.downloader.adapter.TaskDetectAdapter
 import com.example.downloader.dialog.ClipboardDialogFragment
 import com.example.downloader.model.eventbus.UrlMessage
 import com.example.downloader.utils.AndroidUtil
@@ -38,9 +39,12 @@ class DownloadFragment : Fragment() {
 
     private val TAG = "DownloadFragment"
     private val TAG_SHOW_CLIPBOARD_DIALOG: String = "show_clipboard_dialog"
+    @Volatile
+    private var detectingTaskCount: Int = 0
 
-    private lateinit var mAdapter: TaskAdapter
+    private lateinit var mAdapter: TaskDetectAdapter
     private lateinit var mUrlEditText: TextInputEditText
+    private lateinit var mProgressbar: ProgressBar
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -79,11 +83,12 @@ class DownloadFragment : Fragment() {
     }
 
     private fun initView(view: View) {
+        mProgressbar = view.findViewById<ProgressBar>(R.id.v_progressbar)
         mUrlEditText = view.findViewById<TextInputEditText>(R.id.et_url)
         val clearTextButton = view.findViewById<ImageView>(R.id.iv_clear_edittext)
         val recyclerView = view.findViewById<RecyclerView>(R.id.v_recyclerview)
 
-        mAdapter = TaskAdapter(this)
+        mAdapter = TaskDetectAdapter(this)
         recyclerView.adapter = mAdapter
         context?.let {
             recyclerView.layoutManager = LinearLayoutManager(it)
@@ -146,9 +151,12 @@ class DownloadFragment : Fragment() {
         }
 
         if (!AndroidUtil.isNetworkAvailable(requireContext())) {
-            Toast.makeText(context,  R.string.network_not_available, Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, R.string.network_not_available, Toast.LENGTH_SHORT).show()
             return
         }
+
+        detectingTaskCount++
+        mProgressbar.visibility = View.VISIBLE
 
         lifecycleScope.launch(Dispatchers.IO) {
             try {
@@ -164,6 +172,16 @@ class DownloadFragment : Fragment() {
                 withContext(Dispatchers.Main) {
                     // TODO: 处理失败的情况
                     Toast.makeText(context, "失败", Toast.LENGTH_SHORT).show()
+                }
+
+            } finally {
+                withContext(Dispatchers.Main) {
+                    detectingTaskCount--
+                    mProgressbar.visibility = if (detectingTaskCount == 0) {
+                        View.GONE
+                    } else {
+                        View.VISIBLE
+                    }
                 }
             }
         }

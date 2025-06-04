@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    id("com.google.devtools.ksp")
 }
 
 android {
@@ -47,6 +48,8 @@ dependencies {
     androidTestImplementation(libs.androidx.espresso.core)
     implementation(libs.glide)
     implementation(libs.eventbus)
+    implementation(libs.room)
+    ksp(libs.room.compiler)
 
     implementation(project(":library"))
 }

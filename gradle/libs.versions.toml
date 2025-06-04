@@ -14,6 +14,7 @@ compress = "1.24.0"
 jackson = "2.11.1"
 glide = "4.15.1"
 eventbus = "3.3.1"
+room = "2.7.1"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -30,6 +31,8 @@ jackson-databind = { group = "com.fasterxml.jackson.core", name = "jackson-datab
 jackson-annotations = { group = "com.fasterxml.jackson.core", name = "jackson-annotations", version.ref = "jackson" }
 glide = { group = "com.github.bumptech.glide", name = "glide", version.ref = "glide" }
 eventbus = { group = "org.greenrobot", name = "eventbus", version.ref = "eventbus" }
+room = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
+room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
