@@ -16,6 +16,22 @@ import java.io.File
 import java.io.IOException
 import java.util.Collections
 
+//private const val youtubeDLStableChannelUrl =
+//    "https://api.github.com/repos/yt-dlp/yt-dlp/releases/latest"
+//private const val youtubeDLNightlyChannelUrl =
+//    "https://api.github.com/repos/yt-dlp/yt-dlp-nightly-builds/releases/latest"
+//private const val youtubeDLMasterChannelUrl =
+//    "https://api.github.com/repos/yt-dlp/yt-dlp-master-builds/releases/latest"
+
+/*
+        下载网页文件到本地
+        FileUtils.copyURLToFile(URL source, File destination, int connectionTimeout, int readTimeout)
+              downloadUrl：要下载的资源的 URL
+              file：本地目标文件
+              5000：连接超时时间，单位是毫秒（ms）
+              10000：读取超时时间，单位是毫秒（ms）
+         */
+
 object LibHelper {
 
     private const val TAG = "LibHelper"
