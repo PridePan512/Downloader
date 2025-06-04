@@ -61,7 +61,6 @@ object LibHelper {
         } catch (e: IOException) {
             throw YtDlpException("Unable to parse video information", e.toString())
         } ?: throw YtDlpException("Failed error", "failed to fetch video information")
-        videoInfo.url = request.getUrls()[0]
         return videoInfo
     }
 

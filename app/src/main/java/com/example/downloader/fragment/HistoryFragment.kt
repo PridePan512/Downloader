@@ -60,6 +60,7 @@ class HistoryFragment : Fragment() {
         }
 
         lifecycleScope.launch(Dispatchers.IO) {
+            // TODO: 这里考虑使用分页加载 而不是一次性加载全部
             val histories = MyApplication.database.historyDao().queryAll()
             withContext(Dispatchers.Main) {
                 mAdapter.setData(ArrayList<TaskHistory>(histories))

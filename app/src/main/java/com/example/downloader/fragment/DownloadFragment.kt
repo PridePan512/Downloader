@@ -17,9 +17,12 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.downloader.MyApplication
 import com.example.downloader.R
 import com.example.downloader.adapter.TaskDetectAdapter
 import com.example.downloader.dialog.ClipboardDialogFragment
+import com.example.downloader.model.DownloadState
+import com.example.downloader.model.TaskHistory
 import com.example.downloader.model.eventbus.UrlMessage
 import com.example.downloader.utils.AndroidUtil
 import com.example.library.LibHelper
@@ -39,6 +42,7 @@ class DownloadFragment : Fragment() {
 
     private val TAG = "DownloadFragment"
     private val TAG_SHOW_CLIPBOARD_DIALOG: String = "show_clipboard_dialog"
+
     @Volatile
     private var detectingTaskCount: Int = 0
 
@@ -88,7 +92,58 @@ class DownloadFragment : Fragment() {
         val clearTextButton = view.findViewById<ImageView>(R.id.iv_clear_edittext)
         val recyclerView = view.findViewById<RecyclerView>(R.id.v_recyclerview)
 
-        mAdapter = TaskDetectAdapter(this)
+        mAdapter = TaskDetectAdapter()
+        mAdapter.onDownloadClick = { videoTask, position ->
+            val videoInfo = videoTask.videoInfo
+            if (!TextUtils.isEmpty(videoInfo.webpageUrl)) {
+                videoTask.state = DownloadState.DOWNLOADING
+                mAdapter.notifyItemChanged(position)
+
+                lifecycleScope.launch(Dispatchers.IO) {
+                    try {
+                        // TODO: 处理安卓10以下的权限适配 处理文件已存在的情况
+                        LibHelper.downloadVideo(
+                            videoInfo.webpageUrl!!,
+                            processId = null
+                        ) { _, _, line ->
+                            if (line.startsWith("[Merger]")) {
+                                // 记录存入数据库
+                                val taskHistory = TaskHistory()
+                                taskHistory.title = videoInfo.title
+                                taskHistory.thumbnail = videoInfo.thumbnail
+                                taskHistory.uploader = videoInfo.uploader
+                                taskHistory.url = videoInfo.webpageUrl
+                                taskHistory.duration = videoInfo.duration
+                                taskHistory.time = System.currentTimeMillis()
+                                // 这里把/转化为_ 避免文件系统异常
+                                taskHistory.path = String.format(
+                                    "%s/%s.mp4",
+                                    AndroidUtil.getDownloadDir(),
+                                    taskHistory.title?.replace("/", "_")
+                                )
+                                MyApplication.database.historyDao().insertHistory(taskHistory)
+
+                                // TODO: 这里的进度不太准确 暂时先不显示进度
+                                lifecycleScope.launch(Dispatchers.Main) {
+                                    videoTask.state = DownloadState.DOWNLOADED
+                                    mAdapter.notifyItemChanged(position)
+
+                                    // 通知history tab刷新
+                                    EventBus.getDefault().post(taskHistory)
+                                }
+                            }
+                        }
+
+                    } catch (e: YtDlpException) {
+                        lifecycleScope.launch(Dispatchers.Main) {
+                            videoTask.error = e
+                            videoTask.state = DownloadState.DOWNLOAD_FAILED
+                            mAdapter.notifyItemChanged(position)
+                        }
+                    }
+                }
+            }
+        }
         recyclerView.adapter = mAdapter
         context?.let {
             recyclerView.layoutManager = LinearLayoutManager(it)

@@ -11,7 +11,9 @@
     <color name="text_main">#222222</color>
     <color name="text_sub">#717171</color>
     <color name="color_primary">#FF018786</color>
-    <color name="border_weak">#EAECEF</color>
+    <color name="divide_line">#EAECEF</color>
     <color name="red_main">#E52233</color>
     <color name="bg_dialog">#FFFFFF</color>
+    <color name="bg_window">#FFFFFF</color>
+    <color name="stroke_color">#717171</color>
 </resources>

@@ -53,7 +53,4 @@ class YtDlpRequest {
         return commandList
     }
 
-    fun getUrls(): List<String> {
-        return urls
-    }
 }
