@@ -94,7 +94,7 @@ object LibHelper {
         //将所有文件名缩减为 ASCII 安全字符集（比如把空格换成 _，并移除特殊字符）
         //request.addOption("--restrict-filenames")
         //优先选择分离的视频流（mp4）和音频流（m4a），其次选择最好的 mp4 或任何格式
-        request.addOption("-f", "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best")
+        //request.addOption("-f", "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best")
         request.addOption("-o", getDownloadDir() + "/%(title)s.%(ext)s")
 
         execute(request, processId, callback)

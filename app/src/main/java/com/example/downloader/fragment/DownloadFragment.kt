@@ -91,17 +91,20 @@ class DownloadFragment : Fragment() {
         mUrlEditText = view.findViewById<TextInputEditText>(R.id.et_url)
         val clearTextButton = view.findViewById<ImageView>(R.id.iv_clear_edittext)
         val recyclerView = view.findViewById<RecyclerView>(R.id.v_recyclerview)
+        //防止局部刷新引起闪烁
+        recyclerView.setItemAnimator(null)
 
         mAdapter = TaskDetectAdapter()
         mAdapter.onDownloadClick = { videoTask, position ->
             val videoInfo = videoTask.videoInfo
             if (!TextUtils.isEmpty(videoInfo.webpageUrl)) {
                 videoTask.state = DownloadState.DOWNLOADING
-                mAdapter.notifyItemChanged(position)
+                mAdapter.notifyItemChanged(position, true)
 
                 lifecycleScope.launch(Dispatchers.IO) {
                     try {
                         // TODO: 处理安卓10以下的权限适配 处理文件已存在的情况
+                        // TODO: 处理多个任务同时下载出现的异常
                         LibHelper.downloadVideo(
                             videoInfo.webpageUrl!!,
                             processId = null
@@ -115,30 +118,31 @@ class DownloadFragment : Fragment() {
                                 taskHistory.url = videoInfo.webpageUrl
                                 taskHistory.duration = videoInfo.duration
                                 taskHistory.time = System.currentTimeMillis()
-                                // 这里把/转化为_ 避免文件系统异常
-                                taskHistory.path = String.format(
-                                    "%s/%s.mp4",
-                                    AndroidUtil.getDownloadDir(),
-                                    taskHistory.title?.replace("/", "_")
-                                )
+                                taskHistory.path =
+                                    "\"([^\"]+)\"".toRegex().find(line)?.groups?.get(1)?.value
                                 MyApplication.database.historyDao().insertHistory(taskHistory)
 
                                 // TODO: 这里的进度不太准确 暂时先不显示进度
                                 lifecycleScope.launch(Dispatchers.Main) {
                                     videoTask.state = DownloadState.DOWNLOADED
-                                    mAdapter.notifyItemChanged(position)
+                                    mAdapter.notifyItemChanged(position, true)
+                                }
 
-                                    // 通知history tab刷新
+                                lifecycleScope.launch(Dispatchers.IO) {
+                                    // TODO: 文件合并完成的时机怎么得到？
+                                    //延时 确保文件已经合并完成再刷新
+                                    delay(2000)
                                     EventBus.getDefault().post(taskHistory)
                                 }
                             }
                         }
 
                     } catch (e: YtDlpException) {
+                        Log.e(TAG, "initView: $e")
                         lifecycleScope.launch(Dispatchers.Main) {
                             videoTask.error = e
                             videoTask.state = DownloadState.DOWNLOAD_FAILED
-                            mAdapter.notifyItemChanged(position)
+                            mAdapter.notifyItemChanged(position, true)
                         }
                     }
                 }

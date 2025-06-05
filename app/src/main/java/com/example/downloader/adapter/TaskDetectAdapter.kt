@@ -37,8 +37,18 @@ class TaskDetectAdapter() :
     ) {
         val videoTask: VideoTask = mVideoTasks[position]
         holder.bindData(videoTask)
+        updateItem(holder, videoTask)
         holder.downloadImageView.setOnClickListener {
             onDownloadClick?.invoke(videoTask, position)
+        }
+    }
+
+    override fun onBindViewHolder(holder: MyViewHolder, position: Int, payloads: List<Any?>) {
+        if (payloads.isNotEmpty()) {
+            updateItem(holder, mVideoTasks[position])
+
+        } else {
+            onBindViewHolder(holder, position)
         }
     }
 
@@ -51,8 +61,47 @@ class TaskDetectAdapter() :
         notifyItemInserted(0)
     }
 
+    fun updateItem(holder: MyViewHolder, videoTask: VideoTask) {
+        when (videoTask.state) {
+            DownloadState.NOT_DOWNLOAD -> {
+                holder.progressView.visibility = View.GONE
+                holder.completeImageView.visibility = View.GONE
+                holder.downloadImageView.visibility = View.VISIBLE
+                holder.failedView.visibility = View.GONE
+            }
+
+            DownloadState.DOWNLOADING -> {
+                holder.progressView.visibility = View.VISIBLE
+                holder.completeImageView.visibility = View.GONE
+                holder.downloadImageView.visibility = View.GONE
+                holder.failedView.visibility = View.GONE
+            }
+
+            DownloadState.DOWNLOADED -> {
+                holder.progressView.visibility = View.GONE
+                holder.completeImageView.visibility = View.VISIBLE
+                holder.downloadImageView.visibility = View.GONE
+                holder.failedView.visibility = View.GONE
+            }
+
+            DownloadState.DOWNLOAD_FAILED -> {
+                holder.progressView.visibility = View.GONE
+                holder.completeImageView.visibility = View.GONE
+                holder.downloadImageView.visibility = View.VISIBLE
+                holder.failedTitleTextView.text = videoTask.error?.title
+                holder.failedContentTextView.text = videoTask.error?.content
+                holder.failedView.visibility = View.VISIBLE
+            }
+        }
+    }
+
     class MyViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val downloadImageView = itemView.findViewById<ImageView>(R.id.iv_download)
+        val completeImageView = itemView.findViewById<ImageView>(R.id.iv_complete)
+        val progressView = itemView.findViewById<LinearProgressIndicator>(R.id.v_progress)
+        val failedView = itemView.findViewById<View>(R.id.v_failed)
+        val failedTitleTextView = itemView.findViewById<TextView>(R.id.tv_failed_title)
+        val failedContentTextView = itemView.findViewById<TextView>(R.id.tv_failed_content)
         private val coverImageView = itemView.findViewById<ImageView>(R.id.iv_cover)
         private val titleTextView = itemView.findViewById<TextView>(R.id.tv_title)
         private val authorTextView = itemView.findViewById<TextView>(R.id.tv_author)
@@ -60,11 +109,6 @@ class TaskDetectAdapter() :
         private val sizeTextView = itemView.findViewById<TextView>(R.id.tv_size)
         private val extensionTextView = itemView.findViewById<TextView>(R.id.tv_extension)
         private val durationTextView = itemView.findViewById<TextView>(R.id.tv_duration)
-        private val completeImageView = itemView.findViewById<ImageView>(R.id.iv_complete)
-        private val progressView = itemView.findViewById<LinearProgressIndicator>(R.id.v_progress)
-        private val failedView = itemView.findViewById<View>(R.id.v_failed)
-        private val failedTitleTextView = itemView.findViewById<TextView>(R.id.tv_failed_title)
-        private val failedContentTextView = itemView.findViewById<TextView>(R.id.tv_failed_content)
 
         fun bindData(videoTask: VideoTask) {
             val videoInfo = videoTask.videoInfo
@@ -80,38 +124,6 @@ class TaskDetectAdapter() :
             durationTextView.text = AndroidUtil.formatDuration(videoInfo.duration.toLong())
             durationTextView.background.alpha = 180
             sizeTextView.text = AndroidUtil.getHumanFriendlyByteCount(videoInfo.getSize())
-
-            when (videoTask.state) {
-                DownloadState.NOT_DOWNLOAD -> {
-                    progressView.visibility = View.GONE
-                    completeImageView.visibility = View.GONE
-                    downloadImageView.visibility = View.VISIBLE
-                    failedView.visibility = View.GONE
-                }
-
-                DownloadState.DOWNLOADING -> {
-                    progressView.visibility = View.VISIBLE
-                    completeImageView.visibility = View.GONE
-                    downloadImageView.visibility = View.GONE
-                    failedView.visibility = View.GONE
-                }
-
-                DownloadState.DOWNLOADED -> {
-                    progressView.visibility = View.GONE
-                    completeImageView.visibility = View.VISIBLE
-                    downloadImageView.visibility = View.GONE
-                    failedView.visibility = View.GONE
-                }
-
-                DownloadState.DOWNLOAD_FAILED -> {
-                    progressView.visibility = View.GONE
-                    completeImageView.visibility = View.GONE
-                    downloadImageView.visibility = View.VISIBLE
-                    failedTitleTextView.text = videoTask.error?.title
-                    failedContentTextView.text = videoTask.error?.content
-                    failedView.visibility = View.VISIBLE
-                }
-            }
         }
     }
 }
