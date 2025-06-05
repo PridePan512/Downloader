@@ -101,6 +101,8 @@ class DownloadFragment : Fragment() {
                 videoTask.state = DownloadState.DOWNLOADING
                 mAdapter.notifyItemChanged(position, true)
 
+                val taskHistory = TaskHistory()
+                var isFinish = false
                 lifecycleScope.launch(Dispatchers.IO) {
                     try {
                         // TODO: 处理安卓10以下的权限适配 处理文件已存在的情况
@@ -109,30 +111,32 @@ class DownloadFragment : Fragment() {
                             videoInfo.webpageUrl!!,
                             processId = null
                         ) { _, _, line ->
-                            if (line.startsWith("[Merger]")) {
-                                // 记录存入数据库
-                                val taskHistory = TaskHistory()
-                                taskHistory.title = videoInfo.title
-                                taskHistory.thumbnail = videoInfo.thumbnail
-                                taskHistory.uploader = videoInfo.uploader
-                                taskHistory.url = videoInfo.webpageUrl
-                                taskHistory.duration = videoInfo.duration
-                                taskHistory.time = System.currentTimeMillis()
-                                taskHistory.path =
-                                    "\"([^\"]+)\"".toRegex().find(line)?.groups?.get(1)?.value
-                                MyApplication.database.historyDao().insertHistory(taskHistory)
-
-                                // TODO: 这里的进度不太准确 暂时先不显示进度
-                                lifecycleScope.launch(Dispatchers.Main) {
-                                    videoTask.state = DownloadState.DOWNLOADED
-                                    mAdapter.notifyItemChanged(position, true)
+                            when {
+                                // 在输出Deleting之后 文件已经merge完成
+                                line.startsWith("Deleting") -> {
+                                    if (!isFinish) {
+                                        EventBus.getDefault().post(taskHistory)
+                                        isFinish = true
+                                    }
                                 }
 
-                                lifecycleScope.launch(Dispatchers.IO) {
-                                    // TODO: 文件合并完成的时机怎么得到？
-                                    //延时 确保文件已经合并完成再刷新
-                                    delay(2000)
-                                    EventBus.getDefault().post(taskHistory)
+                                line.startsWith("[Merger]") -> {
+                                    // 记录存入数据库
+                                    taskHistory.title = videoInfo.title
+                                    taskHistory.thumbnail = videoInfo.thumbnail
+                                    taskHistory.uploader = videoInfo.uploader
+                                    taskHistory.url = videoInfo.webpageUrl
+                                    taskHistory.duration = videoInfo.duration
+                                    taskHistory.time = System.currentTimeMillis()
+                                    taskHistory.path =
+                                        "\"([^\"]+)\"".toRegex().find(line)?.groups?.get(1)?.value
+                                    MyApplication.database.historyDao().insertHistory(taskHistory)
+
+                                    // TODO: 这里的进度不太准确 暂时先不显示进度
+                                    lifecycleScope.launch(Dispatchers.Main) {
+                                        videoTask.state = DownloadState.DOWNLOADED
+                                        mAdapter.notifyItemChanged(position, true)
+                                    }
                                 }
                             }
                         }
