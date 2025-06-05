@@ -83,11 +83,7 @@ class VideoInfo {
     //如果fileSize和fileSizeApproximate都为0，那么只能采用比特率和时长来进行近似换算
     fun getSize(): Long {
         return requestedFormats?.sumOf { format ->
-            when {
-                format.fileSize != 0L -> format.fileSize
-                format.fileSizeApproximate != 0L -> format.fileSizeApproximate
-                else -> (duration * format.tbr * 125).toLong()
-            }
+            format.getSize(duration)
         } ?: 0L
     }
 }
@@ -124,6 +120,15 @@ class VideoFormat {
 
     @JsonProperty("http_headers")
     val httpHeaders: Map<String, String>? = null
+
+    //如果fileSize和fileSizeApproximate都为0，那么只能采用比特率和时长来进行近似换算
+    fun getSize(duration: Int): Long {
+        return when {
+            fileSize != 0L -> fileSize
+            fileSizeApproximate != 0L -> fileSizeApproximate
+            else -> (duration * tbr * 125).toLong()
+        }
+    }
 }
 
 @JsonIgnoreProperties(ignoreUnknown = true)

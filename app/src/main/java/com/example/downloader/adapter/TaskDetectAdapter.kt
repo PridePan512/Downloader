@@ -8,6 +8,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.downloader.R
+import com.example.downloader.model.DownloadInfo
 import com.example.downloader.model.DownloadState
 import com.example.downloader.model.VideoTask
 import com.example.downloader.utils.AndroidUtil
@@ -17,6 +18,10 @@ import java.util.Locale
 
 class TaskDetectAdapter() :
     RecyclerView.Adapter<TaskDetectAdapter.MyViewHolder>() {
+
+    companion object {
+        val FLAG_UPDATE_STATE = 0
+    }
 
     var onDownloadClick: ((videoTask: VideoTask, position: Int) -> Unit)? = null
 
@@ -45,7 +50,20 @@ class TaskDetectAdapter() :
 
     override fun onBindViewHolder(holder: MyViewHolder, position: Int, payloads: List<Any?>) {
         if (payloads.isNotEmpty()) {
-            updateItem(holder, mVideoTasks[position])
+            for (payload in payloads) {
+                if (payload is DownloadInfo) {
+                    holder.progressView.isIndeterminate = false
+                    updateItem(
+                        holder,
+                        mVideoTasks[position],
+                        payload.progress,
+                        payload.speed
+                    )
+
+                } else {
+                    updateItem(holder, mVideoTasks[position])
+                }
+            }
 
         } else {
             onBindViewHolder(holder, position)
@@ -61,20 +79,31 @@ class TaskDetectAdapter() :
         notifyItemInserted(0)
     }
 
-    fun updateItem(holder: MyViewHolder, videoTask: VideoTask) {
+    fun updateItem(
+        holder: MyViewHolder,
+        videoTask: VideoTask,
+        progress: Int = 0,
+        speed: String = ""
+    ) {
         when (videoTask.state) {
             DownloadState.NOT_DOWNLOAD -> {
                 holder.progressView.visibility = View.GONE
                 holder.completeImageView.visibility = View.GONE
                 holder.downloadImageView.visibility = View.VISIBLE
                 holder.failedView.visibility = View.GONE
+                holder.downloadSpeedTextView.visibility = View.GONE
+                holder.downloadSpeedTextView.text = ""
+                holder.progressView.progress = 0
             }
 
             DownloadState.DOWNLOADING -> {
-                holder.progressView.visibility = View.VISIBLE
                 holder.completeImageView.visibility = View.GONE
                 holder.downloadImageView.visibility = View.GONE
                 holder.failedView.visibility = View.GONE
+                holder.progressView.visibility = View.VISIBLE
+                holder.downloadSpeedTextView.visibility = View.VISIBLE
+                holder.downloadSpeedTextView.text = speed
+                holder.progressView.progress = progress
             }
 
             DownloadState.DOWNLOADED -> {
@@ -82,6 +111,9 @@ class TaskDetectAdapter() :
                 holder.completeImageView.visibility = View.VISIBLE
                 holder.downloadImageView.visibility = View.GONE
                 holder.failedView.visibility = View.GONE
+                holder.downloadSpeedTextView.visibility = View.GONE
+                holder.downloadSpeedTextView.text = ""
+                holder.progressView.progress = 0
             }
 
             DownloadState.DOWNLOAD_FAILED -> {
@@ -91,6 +123,9 @@ class TaskDetectAdapter() :
                 holder.failedTitleTextView.text = videoTask.error?.title
                 holder.failedContentTextView.text = videoTask.error?.content
                 holder.failedView.visibility = View.VISIBLE
+                holder.downloadSpeedTextView.visibility = View.GONE
+                holder.downloadSpeedTextView.text = ""
+                holder.progressView.progress = 0
             }
         }
     }
@@ -102,6 +137,7 @@ class TaskDetectAdapter() :
         val failedView = itemView.findViewById<View>(R.id.v_failed)
         val failedTitleTextView = itemView.findViewById<TextView>(R.id.tv_failed_title)
         val failedContentTextView = itemView.findViewById<TextView>(R.id.tv_failed_content)
+        val downloadSpeedTextView = itemView.findViewById<TextView>(R.id.tv_speed)
         private val coverImageView = itemView.findViewById<ImageView>(R.id.iv_cover)
         private val titleTextView = itemView.findViewById<TextView>(R.id.tv_title)
         private val authorTextView = itemView.findViewById<TextView>(R.id.tv_author)

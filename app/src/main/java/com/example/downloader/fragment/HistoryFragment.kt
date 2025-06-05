@@ -22,6 +22,7 @@ import org.greenrobot.eventbus.ThreadMode
 class HistoryFragment : Fragment() {
 
     private lateinit var mAdapter: TaskHistoryAdapter
+    private lateinit var mRecyclerView: RecyclerView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -50,13 +51,14 @@ class HistoryFragment : Fragment() {
     @Subscribe(threadMode = ThreadMode.MAIN)
     fun onMessage(taskHistory: TaskHistory) {
         mAdapter.insertItem(taskHistory)
+        mRecyclerView.scrollToPosition(0)
     }
 
     private fun initView(view: View) {
-        val recyclerView = view.findViewById<RecyclerView>(R.id.v_recyclerview)
+        mRecyclerView = view.findViewById<RecyclerView>(R.id.v_recyclerview)
         mAdapter = TaskHistoryAdapter()
         context?.let {
-            recyclerView.layoutManager = LinearLayoutManager(it)
+            mRecyclerView.layoutManager = LinearLayoutManager(it)
         }
 
         lifecycleScope.launch(Dispatchers.IO) {
@@ -64,7 +66,7 @@ class HistoryFragment : Fragment() {
             val histories = MyApplication.database.historyDao().queryAll()
             withContext(Dispatchers.Main) {
                 mAdapter.setData(ArrayList<TaskHistory>(histories))
-                recyclerView.adapter = mAdapter
+                mRecyclerView.adapter = mAdapter
             }
         }
     }

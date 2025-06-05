@@ -21,6 +21,7 @@ import com.example.downloader.MyApplication
 import com.example.downloader.R
 import com.example.downloader.adapter.TaskDetectAdapter
 import com.example.downloader.dialog.ClipboardDialogFragment
+import com.example.downloader.model.DownloadInfo
 import com.example.downloader.model.DownloadState
 import com.example.downloader.model.TaskHistory
 import com.example.downloader.model.eventbus.UrlMessage
@@ -99,18 +100,54 @@ class DownloadFragment : Fragment() {
             val videoInfo = videoTask.videoInfo
             if (!TextUtils.isEmpty(videoInfo.webpageUrl)) {
                 videoTask.state = DownloadState.DOWNLOADING
-                mAdapter.notifyItemChanged(position, true)
+                mAdapter.notifyItemChanged(position, TaskDetectAdapter.FLAG_UPDATE_STATE)
 
                 val taskHistory = TaskHistory()
                 var isFinish = false
+                var isDownloadingAudio = false
                 lifecycleScope.launch(Dispatchers.IO) {
                     try {
                         // TODO: 处理安卓10以下的权限适配 处理文件已存在的情况
                         // TODO: 处理多个任务同时下载出现的异常
+                        // TODO: 处理存储空间不足的情况
+                        var videoPercent = 0.95f
+                        var audioPercent = 0.05f
+
+                        videoInfo.requestedFormats?.takeIf { it.size == 2 }?.let {
+                            val totalSize = videoInfo.getSize()
+                            val videoSize = it[0].getSize(videoInfo.duration)
+                            val audioSize = it[1].getSize(videoInfo.duration)
+
+                            if (totalSize != 0L && videoSize != 0L && audioSize != 0L) {
+                                videoPercent = (videoSize.toDouble() / totalSize).toFloat()
+                                audioPercent = (audioSize.toDouble() / totalSize).toFloat()
+                            }
+                        }
+
                         LibHelper.downloadVideo(
                             videoInfo.webpageUrl!!,
                             processId = null
-                        ) { _, _, line ->
+                        ) { progress, speed, line ->
+
+                            if (progress != 0f) {
+                                if (progress == 100f) {
+                                    isDownloadingAudio = true
+                                }
+
+                                val realProgress = if (!isDownloadingAudio) {
+                                    (progress * videoPercent).toInt()
+                                } else {
+                                    (100 * videoPercent + progress * audioPercent).toInt()
+                                }
+
+                                lifecycleScope.launch(Dispatchers.Main) {
+                                    mAdapter.notifyItemChanged(
+                                        position,
+                                        DownloadInfo(realProgress, speed)
+                                    )
+                                }
+                            }
+
                             when {
                                 // 在输出Deleting之后 文件已经merge完成
                                 line.startsWith("Deleting") -> {
@@ -132,21 +169,26 @@ class DownloadFragment : Fragment() {
                                         "\"([^\"]+)\"".toRegex().find(line)?.groups?.get(1)?.value
                                     MyApplication.database.historyDao().insertHistory(taskHistory)
 
-                                    // TODO: 这里的进度不太准确 暂时先不显示进度
                                     lifecycleScope.launch(Dispatchers.Main) {
                                         videoTask.state = DownloadState.DOWNLOADED
-                                        mAdapter.notifyItemChanged(position, true)
+                                        mAdapter.notifyItemChanged(
+                                            position,
+                                            TaskDetectAdapter.FLAG_UPDATE_STATE
+                                        )
                                     }
                                 }
                             }
                         }
 
                     } catch (e: YtDlpException) {
-                        Log.e(TAG, "initView: $e")
+                        Log.e(TAG, "Download error : ${e.title} , ${e.message}")
                         lifecycleScope.launch(Dispatchers.Main) {
                             videoTask.error = e
                             videoTask.state = DownloadState.DOWNLOAD_FAILED
-                            mAdapter.notifyItemChanged(position, true)
+                            mAdapter.notifyItemChanged(
+                                position,
+                                TaskDetectAdapter.FLAG_UPDATE_STATE
+                            )
                         }
                     }
                 }

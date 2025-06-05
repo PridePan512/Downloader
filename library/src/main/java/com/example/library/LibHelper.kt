@@ -84,7 +84,7 @@ object LibHelper {
     fun downloadVideo(
         url: String,
         processId: String? = null,
-        callback: ((Float, Long, String) -> Unit)? = null
+        callback: ((Float, String, String) -> Unit)? = null
     ) {
         val request = YtDlpRequest(url)
 
@@ -103,7 +103,7 @@ object LibHelper {
     private fun execute(
         request: YtDlpRequest,
         processId: String? = null,
-        callback: ((Float, Long, String) -> Unit)? = null
+        callback: ((Float, String, String) -> Unit)? = null
     ): YtDlpResponse {
         if (!initSuccess) {
             throw YtDlpException("Initialize failed", "please reopen app")
