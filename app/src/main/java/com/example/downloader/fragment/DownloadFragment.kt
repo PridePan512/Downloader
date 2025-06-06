@@ -110,6 +110,8 @@ class DownloadFragment : Fragment() {
                         // TODO: 处理安卓10以下的权限适配 处理文件已存在的情况
                         // TODO: 处理多个任务同时下载出现的异常
                         // TODO: 处理存储空间不足的情况
+                        // TODO: 处理文件重名现象
+                        // TODO: 增加一个temp文件夹存放下载中的临时文件
                         var videoPercent = 0.95f
                         var audioPercent = 0.05f
 
@@ -276,7 +278,7 @@ class DownloadFragment : Fragment() {
                 Log.e(TAG, "initView: $e")
                 withContext(Dispatchers.Main) {
                     // TODO: 处理失败的情况
-                    Toast.makeText(context, "失败", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, R.string.failed, Toast.LENGTH_SHORT).show()
                 }
 
             } finally {
@@ -344,7 +346,7 @@ class DownloadFragment : Fragment() {
         Log.i("test", "videoInfo.fileSize: " + videoInfo.fileSize)
         Log.i("test", "videoInfo.fileSizeApproximate: " + videoInfo.fileSizeApproximate)
         Log.i("test", "videoInfo.manifestUrl: " + videoInfo.manifestUrl)
-        Log.i("test", "videoInfo.url: " + videoInfo.url)
+        //Log.i("test", "videoInfo.url: " + videoInfo.url)
 
         Log.i("test", "videoInfo.httpHeaders.size: " + videoInfo.httpHeaders?.size)
         Log.i("test", "videoInfo.categories.size: " + videoInfo.categories?.size)

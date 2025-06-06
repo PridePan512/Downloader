@@ -11,4 +11,5 @@
     <string name="clear_clipboard">Clear clipboard</string>
     <string name="video_link">Video link</string>
     <string name="unavailable">Unavailable</string>
+    <string name="failed">Failed</string>
 </resources>

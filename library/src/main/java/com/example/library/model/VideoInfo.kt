@@ -16,12 +16,12 @@ class VideoInfo {
     val displayId: String? = null
     val duration = 0 //时长
     val description: String? = null //描述
-    val thumbnail: String? = null //缩略图
+    var thumbnail: String? = null //缩略图
     val license: String? = null //授权信息
     val extractor: String? = null //用于提取信息的工具来源
 
     @JsonProperty("extractor_key")
-    val extractorKey: String? = null //用于提取信息的工具来源
+    val extractorKey: String? = null //用于提取信息的工具来源的key
 
     @JsonProperty("view_count")
     val viewCount: String? = null //播放次数
@@ -77,8 +77,6 @@ class VideoInfo {
 
     @JsonProperty("manifest_url")
     val manifestUrl: String? = null
-
-    var url: String? = null
 
     //如果fileSize和fileSizeApproximate都为0，那么只能采用比特率和时长来进行近似换算
     fun getSize(): Long {

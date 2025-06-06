@@ -44,6 +44,7 @@ class TaskDetectAdapter() :
         holder.bindData(videoTask)
         updateItem(holder, videoTask)
         holder.downloadImageView.setOnClickListener {
+            holder.progressView.isIndeterminate = true
             onDownloadClick?.invoke(videoTask, position)
         }
     }

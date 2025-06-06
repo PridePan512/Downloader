@@ -77,6 +77,9 @@ object LibHelper {
         } catch (e: IOException) {
             throw YtDlpException("Unable to parse video information", e.toString())
         } ?: throw YtDlpException("Failed error", "failed to fetch video information")
+
+        //用https代替http 防止缩略图无法加载
+        videoInfo.thumbnail = videoInfo.thumbnail?.replaceFirst("http://", "https://")
         return videoInfo
     }
 
