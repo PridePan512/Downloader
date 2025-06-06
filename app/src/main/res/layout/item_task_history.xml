@@ -43,10 +43,10 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/iv_cover"
         app:layout_constraintTop_toTopOf="parent"
-        tools:text="yt-dlp 是一个开源的视频爬虫命令行程序，它支持绝大部分视频网站，包括 YouTube、Facebook、Instagram、Vimeo 等。yt-dlp 是 youtube-dl 的一个分支，提供了更多的功能和更广泛的支持。本指南将介绍 yt-dlp 的基本用法，包括如何下载视频、选择视频格式、下载字幕等。此外，我们还将介绍如何在 macOS 和 Windows 上安装 yt-dlp 和 ffmpeg，以及如何使用代理进行视频下载" />
+        tools:text="title" />
 
     <TextView
-        android:id="@+id/tv_author"
+        android:id="@+id/tv_uploader"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="5dp"
@@ -68,7 +68,7 @@
         android:textStyle="bold"
         android:visibility="gone"
         app:layout_constraintStart_toStartOf="@id/tv_title"
-        app:layout_constraintTop_toBottomOf="@id/tv_author"
+        app:layout_constraintTop_toBottomOf="@id/tv_uploader"
         tools:text="10.58MB" />
 
     <TextView
@@ -81,6 +81,6 @@
         android:textSize="11sp"
         android:visibility="gone"
         app:layout_constraintStart_toStartOf="@id/tv_title"
-        app:layout_constraintTop_toBottomOf="@id/tv_author" />
+        app:layout_constraintTop_toBottomOf="@id/tv_uploader" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

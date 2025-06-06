@@ -8,13 +8,12 @@ import android.content.Context.INPUT_METHOD_SERVICE
 import android.content.res.Resources
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
-import android.os.Environment
 import android.text.format.DateUtils
 import android.util.Patterns
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import androidx.annotation.RequiresPermission
-import java.io.File
+import java.text.SimpleDateFormat
 import java.util.Locale
 import kotlin.math.ln
 import kotlin.math.pow
@@ -133,12 +132,11 @@ object AndroidUtil {
         imm.hideSoftInputFromWindow(view.windowToken, 0)
     }
 
-    fun getDownloadDir(): String {
-        val downloadsDir = File(
-            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
-            "download_test"
-        )
-        if (!downloadsDir.exists()) downloadsDir.mkdir()
-        return downloadsDir.absolutePath
+    fun formatLocalizedDate(dateStr: String, locale: Locale): String {
+        val inputFormat = SimpleDateFormat("yyyyMMdd", Locale.US)
+        val date = inputFormat.parse(dateStr)
+
+        val localizedFormat = SimpleDateFormat.getDateInstance(SimpleDateFormat.LONG, locale)
+        return localizedFormat.format(date!!)
     }
 }

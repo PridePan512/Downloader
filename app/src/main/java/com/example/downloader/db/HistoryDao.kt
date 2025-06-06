@@ -14,7 +14,7 @@ interface HistoryDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertHistory(taskHistory: TaskHistory)
 
-    @Query("SELECT * FROM task ORDER BY time DESC")
+    @Query("SELECT * FROM task ORDER BY downloadTime DESC")
     fun queryAll(): List<TaskHistory>
 
     @Update

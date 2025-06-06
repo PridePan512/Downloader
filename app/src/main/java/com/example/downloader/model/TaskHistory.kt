@@ -8,7 +8,9 @@ data class TaskHistory(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,
     var duration: Int = 0,
-    var time: Long = 0,
+    var downloadTime: Long = 0,
+    var uploadData: String? = null,
+    var resource: String? = null,
     var title: String? = null,
     var thumbnail: String? = null,
     var uploader: String? = null,

@@ -49,7 +49,7 @@ class TaskHistoryAdapter() : RecyclerView.Adapter<TaskHistoryAdapter.MyViewHolde
     class MyViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val coverImageView = itemView.findViewById<ImageView>(R.id.iv_cover)
         private val titleTextView = itemView.findViewById<TextView>(R.id.tv_title)
-        private val authorTextView = itemView.findViewById<TextView>(R.id.tv_author)
+        private val uploaderTextView = itemView.findViewById<TextView>(R.id.tv_uploader)
         private val sizeTextView = itemView.findViewById<TextView>(R.id.tv_size)
         private val durationTextView = itemView.findViewById<TextView>(R.id.tv_duration)
         private val unavailableTextView = itemView.findViewById<TextView>(R.id.tv_unavailable)
@@ -61,7 +61,7 @@ class TaskHistoryAdapter() : RecyclerView.Adapter<TaskHistoryAdapter.MyViewHolde
                 .centerCrop()
                 .into(coverImageView)
             titleTextView.text = taskHistory.title
-            authorTextView.text = taskHistory.uploader
+            uploaderTextView.text = taskHistory.uploader
             durationTextView.text = AndroidUtil.formatDuration(taskHistory.duration.toLong())
             durationTextView.background.alpha = 180
 

@@ -79,10 +79,11 @@ class VideoInfo {
     val manifestUrl: String? = null
 
     //如果fileSize和fileSizeApproximate都为0，那么只能采用比特率和时长来进行近似换算
+    //需要考虑到有些来源的视频requestedFormats为空的情况
     fun getSize(): Long {
         return requestedFormats?.sumOf { format ->
             format.getSize(duration)
-        } ?: 0L
+        } ?: formats?.find { it.formatId == formatId }?.getSize(duration) ?: 0L
     }
 }
 

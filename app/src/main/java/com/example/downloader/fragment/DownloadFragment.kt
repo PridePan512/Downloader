@@ -166,7 +166,10 @@ class DownloadFragment : Fragment() {
                                     taskHistory.uploader = videoInfo.uploader
                                     taskHistory.url = videoInfo.webpageUrl
                                     taskHistory.duration = videoInfo.duration
-                                    taskHistory.time = System.currentTimeMillis()
+                                    taskHistory.downloadTime = System.currentTimeMillis()
+                                    taskHistory.uploadData = videoInfo.uploadDate
+                                    taskHistory.resource =
+                                        videoInfo.extractorKey ?: videoInfo.extractor
                                     taskHistory.path =
                                         "\"([^\"]+)\"".toRegex().find(line)?.groups?.get(1)?.value
                                     MyApplication.database.historyDao().insertHistory(taskHistory)

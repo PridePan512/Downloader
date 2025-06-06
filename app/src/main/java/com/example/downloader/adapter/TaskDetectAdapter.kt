@@ -141,11 +141,12 @@ class TaskDetectAdapter() :
         val downloadSpeedTextView = itemView.findViewById<TextView>(R.id.tv_speed)
         private val coverImageView = itemView.findViewById<ImageView>(R.id.iv_cover)
         private val titleTextView = itemView.findViewById<TextView>(R.id.tv_title)
-        private val authorTextView = itemView.findViewById<TextView>(R.id.tv_author)
+        private val uploaderTextView = itemView.findViewById<TextView>(R.id.tv_uploader)
         private val formatTextView = itemView.findViewById<TextView>(R.id.tv_format)
         private val sizeTextView = itemView.findViewById<TextView>(R.id.tv_size)
         private val extensionTextView = itemView.findViewById<TextView>(R.id.tv_extension)
         private val durationTextView = itemView.findViewById<TextView>(R.id.tv_duration)
+        private val dateTextView = itemView.findViewById<TextView>(R.id.tv_date)
 
         fun bindData(videoTask: VideoTask) {
             val videoInfo = videoTask.videoInfo
@@ -155,12 +156,21 @@ class TaskDetectAdapter() :
                 .centerCrop()
                 .into(coverImageView)
             titleTextView.text = videoInfo.title
-            authorTextView.text = videoInfo.uploader
             extensionTextView.text = videoInfo.ext?.uppercase(Locale.getDefault())
             formatTextView.text = videoInfo.format
             durationTextView.text = AndroidUtil.formatDuration(videoInfo.duration.toLong())
             durationTextView.background.alpha = 180
             sizeTextView.text = AndroidUtil.getHumanFriendlyByteCount(videoInfo.getSize())
+            uploaderTextView.text = videoInfo.uploader
+
+            try {
+                dateTextView.text = AndroidUtil.formatLocalizedDate(
+                    videoInfo.uploadDate.toString(),
+                    Locale.getDefault()
+                )
+            } catch (_: Exception) {
+                dateTextView.visibility = View.GONE
+            }
         }
     }
 }
