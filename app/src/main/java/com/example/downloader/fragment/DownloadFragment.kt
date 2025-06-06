@@ -38,6 +38,7 @@ import kotlinx.coroutines.withContext
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
+import java.io.File
 
 class DownloadFragment : Fragment() {
 
@@ -111,7 +112,9 @@ class DownloadFragment : Fragment() {
                         // TODO: 处理多个任务同时下载出现的异常
                         // TODO: 处理存储空间不足的情况
                         // TODO: 处理文件重名现象
-                        // TODO: 增加一个temp文件夹存放下载中的临时文件
+                        // TODO: 使用diffutil
+                        // TODO: 处理进度不准确的bug
+                        // TODO: temp文件夹的清理时机？
                         var videoPercent = 0.95f
                         var audioPercent = 0.05f
 
@@ -125,6 +128,8 @@ class DownloadFragment : Fragment() {
                                 audioPercent = (audioSize.toDouble() / totalSize).toFloat()
                             }
                         }
+
+                        var sourcePath: String? = null
 
                         LibHelper.downloadVideo(
                             videoInfo.webpageUrl!!,
@@ -154,13 +159,31 @@ class DownloadFragment : Fragment() {
                                 // 在输出Deleting之后 文件已经merge完成
                                 line.startsWith("Deleting") -> {
                                     if (!isFinish) {
-                                        EventBus.getDefault().post(taskHistory)
                                         isFinish = true
+                                        //把最终文件移出temp 记录存入数据库
+                                        val sourceFile = File(
+                                            sourcePath!!
+                                        )
+                                        val targetFile =
+                                            File(sourceFile.parentFile!!.parent!!, sourceFile.name)
+                                        sourceFile.renameTo(targetFile)
+
+                                        taskHistory.path = targetFile.absolutePath
+                                        MyApplication.database.historyDao()
+                                            .insertHistory(taskHistory)
+                                        EventBus.getDefault().post(taskHistory)
+
+                                        lifecycleScope.launch(Dispatchers.Main) {
+                                            videoTask.state = DownloadState.DOWNLOADED
+                                            mAdapter.notifyItemChanged(
+                                                position,
+                                                TaskDetectAdapter.FLAG_UPDATE_STATE
+                                            )
+                                        }
                                     }
                                 }
 
                                 line.startsWith("[Merger]") -> {
-                                    // 记录存入数据库
                                     taskHistory.title = videoInfo.title
                                     taskHistory.thumbnail = videoInfo.thumbnail
                                     taskHistory.uploader = videoInfo.uploader
@@ -170,17 +193,9 @@ class DownloadFragment : Fragment() {
                                     taskHistory.uploadData = videoInfo.uploadDate
                                     taskHistory.resource =
                                         videoInfo.extractorKey ?: videoInfo.extractor
-                                    taskHistory.path =
-                                        "\"([^\"]+)\"".toRegex().find(line)?.groups?.get(1)?.value
-                                    MyApplication.database.historyDao().insertHistory(taskHistory)
 
-                                    lifecycleScope.launch(Dispatchers.Main) {
-                                        videoTask.state = DownloadState.DOWNLOADED
-                                        mAdapter.notifyItemChanged(
-                                            position,
-                                            TaskDetectAdapter.FLAG_UPDATE_STATE
-                                        )
-                                    }
+                                    sourcePath = "\"([^\"]+)\"".toRegex()
+                                        .find(line)?.groups?.get(1)?.value
                                 }
                             }
                         }
@@ -201,7 +216,10 @@ class DownloadFragment : Fragment() {
         }
         recyclerView.adapter = mAdapter
         context?.let {
-            recyclerView.layoutManager = LinearLayoutManager(it)
+            val layoutManager = LinearLayoutManager(it)
+            layoutManager.reverseLayout = true
+            layoutManager.stackFromEnd = true
+            recyclerView.layoutManager = layoutManager
         }
 
         mUrlEditText.addTextChangedListener(object : TextWatcher {
@@ -278,7 +296,7 @@ class DownloadFragment : Fragment() {
                 }
 
             } catch (e: YtDlpException) {
-                Log.e(TAG, "initView: $e")
+                Log.e(TAG, "Get task info error: $e")
                 withContext(Dispatchers.Main) {
                     // TODO: 处理失败的情况
                     Toast.makeText(context, R.string.failed, Toast.LENGTH_SHORT).show()

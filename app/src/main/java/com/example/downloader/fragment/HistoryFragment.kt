@@ -51,14 +51,16 @@ class HistoryFragment : Fragment() {
     @Subscribe(threadMode = ThreadMode.MAIN)
     fun onMessage(taskHistory: TaskHistory) {
         mAdapter.insertItem(taskHistory)
-        mRecyclerView.scrollToPosition(0)
     }
 
     private fun initView(view: View) {
         mRecyclerView = view.findViewById<RecyclerView>(R.id.v_recyclerview)
         mAdapter = TaskHistoryAdapter()
         context?.let {
-            mRecyclerView.layoutManager = LinearLayoutManager(it)
+            val layoutManager = LinearLayoutManager(it)
+            layoutManager.reverseLayout = true
+            layoutManager.stackFromEnd = true
+            mRecyclerView.layoutManager = layoutManager
         }
 
         lifecycleScope.launch(Dispatchers.IO) {

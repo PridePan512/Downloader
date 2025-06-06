@@ -279,9 +279,9 @@ object LibHelper {
     private fun getDownloadDir(): String {
         val downloadsDir = File(
             Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
-            "download_test"
+            "download_test/temp"
         )
-        if (!downloadsDir.exists()) downloadsDir.mkdir()
+        if (!downloadsDir.exists()) downloadsDir.mkdirs()
         return downloadsDir.absolutePath
     }
 }

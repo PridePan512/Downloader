@@ -76,8 +76,8 @@ class TaskDetectAdapter() :
     }
 
     fun insertTask(videoInfo: VideoInfo) {
-        mVideoTasks.add(0, VideoTask(videoInfo))
-        notifyItemInserted(0)
+        mVideoTasks.add(VideoTask(videoInfo))
+        notifyItemInserted(mVideoTasks.size - 1)
     }
 
     fun updateItem(

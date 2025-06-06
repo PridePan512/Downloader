@@ -42,8 +42,8 @@ class TaskHistoryAdapter() : RecyclerView.Adapter<TaskHistoryAdapter.MyViewHolde
     }
 
     fun insertItem(history: TaskHistory) {
-        mTaskHistories.add(0, history)
-        notifyItemInserted(0)
+        mTaskHistories.add(history)
+        notifyItemInserted(mTaskHistories.size - 1)
     }
 
     class MyViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
